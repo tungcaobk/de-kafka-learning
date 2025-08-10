@@ -208,3 +208,7 @@ __marimo__/
 logs
 .idea
 config.ini
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
