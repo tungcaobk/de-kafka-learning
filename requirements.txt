@@ -1,0 +1,28 @@
+# PySpark và core dependencies
+pyspark==3.5.0
+
+# Arrow cho columnar processing và pandas integration
+pyarrow>=10.0.0,<15.0.0
+
+# gRPC cho communication với cluster
+grpcio>=1.48.0,<2.0.0
+grpcio-status>=1.48.1
+
+# Numpy cho numerical operations
+numpy>=1.21.0,<2.0.0
+
+# Pandas cho DataFrame operations
+pandas>=2.0.0,<3.0.0
+
+# Optional nhưng hữu ích
+matplotlib>=3.3.0       # Cho plotting
+seaborn>=0.11.0        # Cho data visualization
+jupyter>=1.0.0         # Nếu dùng notebook
+
+# Nếu cần machine learning
+scikit-learn>=1.0.0
+
+# Nếu cần connect database
+pymongo>=4.0.0         # MongoDB
+psycopg2-binary>=2.9.0 # PostgreSQL
+mysql-connector-python>=8.0.0  # MySQL
