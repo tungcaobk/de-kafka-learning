@@ -29,55 +29,47 @@ def main():
     step2 = datetime.now()
     logging.info(f"Load csv file in {(step2 - step1).total_seconds()} second")
 
-    # logging.info("Survey df schema: ")
-    # survey_df.printSchema()
-    # logging.info(survey_df.schema.simpleString())
-    # logging.info(survey_df._show_string())
-    #
+    logging.info("Survey df schema: ")
+    survey_df.printSchema()
+    # survey_df.show()
+
 
     logging.info("Create spark_view")
     survey_df.createOrReplaceTempView("spark_view")  # temporary use spark_view for query sql
 
-    # gender_df = survey_df.select(col('Gender'), col('Country'),
-    #                              f.when(('male' == f.lower(col('Gender'))) | ('m' == f.lower(col('Gender'))), 1)
-    #                              .otherwise(0).alias('num_male'))
-    # gender_df.show()
-
-    # gender_df = spark.sql(
-    #     """
-    #         select
-    #             Country,
-    #             count(
-    #                 case
-    #                     when lower(Gender) = 'male' or lower(Gender) = 'm' then 1
-    #                 end) as num_male
-    #         from spark_view
-    #         group by Country
-    #         order by num_male desc
-    #     """
-    # )
-    # gender_df.show()
-
-    # age40_df = survey_df \
-    #     .filter(col('Age') > 40) \
-    #     .groupBy('Country') \
-    #     .agg(f.count('*').alias('cnt')) \
-    #     .orderBy(f.desc('cnt'))
-    # age40_df.show()
-
-    count_df = spark.sql(
+    udf_df = spark.sql(
         """
-            select Country, count(1) as cnt from spark_view
-            where Age > 40
-            group by Country
-            order by count(1) desc
-        """
+                    with castData as (
+                        select 
+                            Age, Gender, Country, state, no_employees,
+                            CAST(regexp_extract(no_employees, '\\\\d+', 0) AS INT) AS cast_employee
+                        from spark_view
+                    )
+                    select 
+                        Age, Gender, Country, state, no_employees
+                    from castData
+                    where cast_employee >= 500
+                """
+        # """
+        #     select
+        #         Age, Gender, Country, state, no_employees
+        #     from spark_view
+        #     where
+        #         (
+        #           no_employees LIKE 'More than%'
+        #           AND CAST(regexp_extract(no_employees, '\\d+', 0) AS INT) >= 500
+        #         )
+        #         OR
+        #         (
+        #           regexp_like(no_employees, '^\\d+-\\d+$')
+        #           AND CAST(regexp_extract(no_employees, '\\d+', 0) AS INT) >= 500
+        #         )
+        # """
     )
-    count_df.show()
-    # logging.info("Count country by age dataframe:")
-    # count_df.printSchema()
-    # logging.info(count_df.schema.simpleString())
-    # count_df.show()
+    logging.info("UDF df schema: ")
+    udf_df.printSchema()
+    udf_df.show()
+    logging.info(f"Total count: {udf_df.count()}")
 
     logging.info("Stop SparkSQL")
     spark.stop()
